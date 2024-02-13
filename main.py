@@ -26,8 +26,8 @@ from torch.utils.data import DataLoader
 gc.collect()
 torch.cuda.empty_cache()
 parser = argparse.ArgumentParser(description='Main code')
-parser.add_argument('--root_distorted', type=str, default='low_light_data_capture/input/', help='train and test datasets')
-parser.add_argument('--root_restored', type=str, default='low_light_data_capture/gt/', help='save output images')
+parser.add_argument('--root_distorted', type=str, default='../low_light_data_capture/input/', help='train and test datasets')
+parser.add_argument('--root_restored', type=str, default='../low_light_data_capture/gt/', help='save output images')
 
 parser.add_argument('--resultDir', type=str, default='STASUNet', help='save output images')
 parser.add_argument('--unetdepth', type=int, default=5, metavar='N',  help='number of depths')
@@ -77,8 +77,8 @@ embed_dim = args.embed_dim
 if not os.path.exists(resultDir):
     os.mkdir(resultDir)
 
-train_txt_file = 'train_list.txt'
-test_txt_file = 'test_list.txt'
+train_txt_file = '../low_light_data_capture/train_list.txt'
+test_txt_file = '../low_light_data_capture/test_list.txt'
 class LowLightDataset(Dataset):
     """Face Landmarks dataset."""
     def __init__(self, root_distorted, root_restored='', network='STASUNet', numframes=3, transform=None):

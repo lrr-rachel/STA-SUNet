@@ -11,7 +11,6 @@ from torch.nn import init as init
 from torch.nn.modules.batchnorm import _BatchNorm
 
 from dcn import ModulatedDeformConvPack, modulated_deform_conv
-from logger import get_root_logger
 
 
 @torch.no_grad()
@@ -224,9 +223,9 @@ class DCNv2Pack(ModulatedDeformConvPack):
         mask = torch.sigmoid(mask)
 
         offset_absmean = torch.mean(torch.abs(offset))
-        if offset_absmean > 50:
-            logger = get_root_logger()
-            logger.warning(f'Offset abs mean is {offset_absmean}, larger than 50.')
+        # if offset_absmean > 50:
+        #     logger = get_root_logger()
+        #     logger.warning(f'Offset abs mean is {offset_absmean}, larger than 50.')
 
         if LooseVersion(torchvision.__version__) >= LooseVersion('0.9.0'):
             return torchvision.ops.deform_conv2d(x, offset, self.weight, self.bias, self.stride, self.padding,
