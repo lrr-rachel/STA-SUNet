@@ -32,11 +32,11 @@ class PCDAlignment(nn.Module):
         # Pyramids
         for i in range(3, 0, -1):
             level = f'l{i}'
-            self.offset_conv1[level] = nn.Conv2d(num_feat * 2, num_feat, 3, 1, 1)
+            self.offset_conv1[level] = nn.Conv2d(num_feat * 2, num_feat, 3, 1, 1) # concatenating from 2 sources - cur and ref frames
             if i == 3:
                 self.offset_conv2[level] = nn.Conv2d(num_feat, num_feat, 3, 1, 1)
             else:
-                self.offset_conv2[level] = nn.Conv2d(num_feat * 2, num_feat, 3, 1, 1)
+                self.offset_conv2[level] = nn.Conv2d(num_feat * 2, num_feat, 3, 1, 1) 
                 self.offset_conv3[level] = nn.Conv2d(num_feat, num_feat, 3, 1, 1)
             self.dcn_pack[level] = DCNv2Pack(num_feat, num_feat, 3, padding=1, deformable_groups=deformable_groups)
 

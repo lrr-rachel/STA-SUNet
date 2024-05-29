@@ -1,4 +1,4 @@
-# [A SPATIO-TEMPORAL ALIGNED SUNET MODEL FOR LOW-LIGHT VIDEO ENHANCEMENT]  
+# A SPATIO-TEMPORAL ALIGNED SUNET MODEL FOR LOW-LIGHT VIDEO ENHANCEMENT  
 
 <!-- ## author   -->
 
@@ -25,7 +25,8 @@ yielding fairly good visualisation results.
 ## STA-SUNet Architecture  
 <img src = "stasunet.png">
 
+## TODO
 ## Train
 ```
-python main.py --lowlightmode
+python train.py
 ```
