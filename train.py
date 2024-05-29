@@ -2,16 +2,11 @@ import argparse
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.optim import lr_scheduler
 import numpy as np
-from arch import PCDAlignment, STASUNet
-
-import torchvision
+from arch.arch import STASUNet
 import time
 import os
-import copy
 import glob
-
 import cv2
 import datasets
 import yaml
@@ -19,9 +14,8 @@ from tqdm import tqdm
 
 parser = argparse.ArgumentParser(description='Main code')
 parser.add_argument("--config", default='STASUNet.yml', type=str, help="training config file")
-parser.add_argument('--resultDir', type=str, default='STASUNet', help='save output')
+parser.add_argument('--resultDir', type=str, default='STASUNet', help='save output location')
 parser.add_argument('--savemodelname', type=str, default='model')
-parser.add_argument('--maxepoch', type=int, default=15)
 parser.add_argument('--retrain', action='store_true')
 
 parser.add_argument('--unetdepth', type=int, default=5, metavar='N',  help='PCDUNet depth')
@@ -48,13 +42,8 @@ if torch.cuda.is_available():
 else:
     print('using CPU')
 
-resultDir = args.resultDir
-savemodelname = args.savemodelname
-maxepoch = args.maxepoch
-
-
-if not os.path.exists(resultDir):
-    os.mkdir(resultDir)
+if not os.path.exists(args.resultDir):
+    os.mkdir(args.resultDir)
 
 def train():
     dataset = datasets.__dict__[config.dataset.type](config)
@@ -65,26 +54,28 @@ def train():
     if torch.cuda.is_available():
         print(f"Number of available GPUs: {torch.cuda.device_count()}")
 
-    resultDirModel = os.path.join(resultDir,savemodelname)
+    resultDirModel = os.path.join(args.resultDir,args.savemodelname)
     if not os.path.exists(resultDirModel):
         os.mkdir(resultDirModel)
 
-    resultDirOut = os.path.join(resultDir,"trainingImg")
+    resultDirOut = os.path.join(args.resultDir,"trainingImg")
     if not os.path.exists(resultDirOut):
         os.mkdir(resultDirOut)
 
     if config.model.network=='STASUNet':
         model = STASUNet(num_in_ch=config.model.num_in_ch,num_out_ch=config.model.num_out_ch,num_feat=config.model.num_feat,num_frame=config.dataset.num_frames,deformable_groups=config.model.deformable_groups,num_extract_block=config.model.deformable_groups,
-                        num_reconstruct_block=config.model.num_reconstruct_block,center_frame_idx=None,hr_in=config.model.hr_in,img_size=config.dataset.image_size,patch_size=config.model.patch_size,embed_dim=config.model.num_feat, depths=config.model.depths,num_heads=config.model.num_heads,
+                        num_reconstruct_block=config.model.num_reconstruct_block,center_frame_idx=None,hr_in=config.model.hr_in,img_size=config.dataset.image_size,patch_size=config.model.patch_size,embed_dim=config.model.embed_dim, depths=config.model.depths,num_heads=config.model.num_heads,
                         window_size = config.model.window_size,patch_norm=config.model.patch_norm,final_upsample="Dual up-sample")
+    else:
+        print("please specify model name!")
 
-    if retrain:
-        models = glob.glob(os.path.join(resultDir, savemodelname + '_ep*.pth.tar'))
+    if args.retrain:
+        models = glob.glob(os.path.join(args.resultDirModel, args.savemodelname + '_ep*.pth.tar'))
         if len(models)>0:
             # get the last model
             epoch_start = max([int(os.path.basename(model).split('_ep')[1].split('.')[0]) for model in models])
             print("The latest epoch is: ", epoch_start)
-        model.load_state_dict(torch.load(os.path.join(resultDir, savemodelname + '_ep'+str(epoch_start)+'.pth.tar'),map_location=device))
+        model.load_state_dict(torch.load(os.path.join(args.resultDirModel, args.savemodelname + '_ep'+str(epoch_start)+'.pth.tar'),map_location=device))
         epoch_start += 1 # only increase if further training
 
     model = model.to(device)
@@ -95,12 +86,12 @@ def train():
     criterion = nn.L1Loss()
 
     # Observe that all parameters are being optimized
-    optimizer = optim.Adam(model.parameters(), lr=0.000001)
+    optimizer = optim.Adam(model.parameters(), lr=config.training.lr)
 
     # =====================================================================
     # Log starting time
     time_start = time.time()
-    num_epochs=maxepoch
+    num_epochs = config.training.maxepoch
     best_acc = 100000000.0
     train_loss = []
     val_loss = []
@@ -147,16 +138,16 @@ def train():
                 
             print('[Epoch] ' + str(epoch),':' + '[Loss] ' + str(epoch_loss))
 
-            torch.save(model.state_dict(), os.path.join(resultDirModel, savemodelname + '_ep'+str(epoch)+'.pth.tar'))
+            torch.save(model.state_dict(), os.path.join(resultDirModel, args.savemodelname + '_ep'+str(epoch)+'.pth.tar'))
             np.save(os.path.join(resultDirModel,'loss_array.npy'), np.array(train_loss))
             # deep copy the model
             if (epoch>2) and (epoch_loss < best_acc):
                 best_acc = epoch_loss
-                torch.save(model.state_dict(), os.path.join(resultDir, 'best_'+savemodelname+'.pth.tar'))
+                torch.save(model.state_dict(), os.path.join(args.resultDirModel, 'best_'+args.savemodelname+'.pth.tar'))
 
     # Log ending time 
     time_end = time.time()
-    print ("%.2f hours for training." % ((time_end-time_start)/3600))
+    print ("Total %.2f hours for training." % ((time_end-time_start)/3600))
 
 if __name__ == '__main__':
     train()

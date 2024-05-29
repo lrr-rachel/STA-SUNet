@@ -1,8 +1,8 @@
 import torch
 from torch import nn as nn
 from torch.nn import functional as F
-from arch_util import DCNv2Pack, ResidualBlockNoBN, make_layer
-from arch_sunet import *
+from arch.arch_util import DCNv2Pack, ResidualBlockNoBN, make_layer
+from arch.arch_sunet import *
 
 
 class PCDAlignment(nn.Module):
@@ -335,7 +335,7 @@ class STASUNet(nn.Module):
         feat_l2 = feat_l2.view(b, t, -1, h // 2, w // 2)
         feat_l3 = feat_l3.view(b, t, -1, h // 4, w // 4)
 
-        # PCD alignment
+        # PCD alignment Module
         ref_feat_l = [  # reference feature list
             feat_l1[:, self.center_frame_idx, :, :, :].clone(), feat_l2[:, self.center_frame_idx, :, :, :].clone(),
             feat_l3[:, self.center_frame_idx, :, :, :].clone()
@@ -349,8 +349,9 @@ class STASUNet(nn.Module):
         aligned_feat = torch.stack(aligned_feat, dim=1)  # (b, t, c, h, w)
 
         aligned_feat = aligned_feat.view(b, -1, h, w)
+        # fuse frames together
         feat = self.fusion(aligned_feat)
-
+        # reconstruction and upsample
         out = self.reconstruction(feat)
         out = self.conv_last(out)
         if self.hr_in:

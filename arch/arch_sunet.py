@@ -1,9 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.utils.checkpoint as checkpoint
-from einops import rearrange
 from timm.models.layers import DropPath, to_2tuple, trunc_normal_
-from thop import profile
 
 '''Ref Paper: SUNet: Swin Transformer with UNet for Image Denoising (https://github.com/FanChiMao/SUNet)'''
 

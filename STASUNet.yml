@@ -1,9 +1,13 @@
 dataset:
   type: "BVILowLight"
-  train_file: "../low_light_data_capture/train_list.txt"
-  val_file: "../low_light_data_capture/test_list.txt"
-  root_distorted: "../low_light_data_capture/input"
-  root_restored: "../low_light_data_capture/gt"
+  # train_file: "../low_light_data_capture/train_list.txt"
+  # val_file: "../low_light_data_capture/test_list.txt"
+  # root_distorted: "../low_light_data_capture/input"
+  # root_restored: "../low_light_data_capture/gt"
+  train_file: "../Aligned_frames/train_list.txt"
+  val_file: "../Aligned_frames/test_list.txt"
+  root_distorted: "../Aligned_frames/input"
+  root_restored: "../Aligned_frames/gt"
   image_size: 512
   num_frames: 5
   num_workers: 4
@@ -15,6 +19,7 @@ model:
   num_in_ch: 3
   num_out_ch: 3
   num_feat: 16
+  embed_dim: 16
   window_size: 8
   patch_norm: True
   deformable_groups: 8
@@ -25,7 +30,9 @@ model:
   num_heads: [8, 8, 8, 8]
 
 training:
-  batch_size: 4
+  batch_size: 1
+  maxepoch: 20
+  lr: 0.0001
   
 
 

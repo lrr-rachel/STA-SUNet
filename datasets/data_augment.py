@@ -1,6 +1,5 @@
 import torch
 from torchvision import transforms 
-from torchvision.transforms.functional import to_tensor
 import numpy as np
 
 class RandomCrop(object):
