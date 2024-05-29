@@ -66,8 +66,8 @@ class LowLightDataset(Dataset):
         # print("read training folder names: ", self.folder_names)
 
         # log restored and distorted image patterns
-        restored_patterns = ['normal_light_10\\*.png', 'normal_light_20\\*.png']
-        distorted_patterns = ['low_light_10\\*.png', 'low_light_20\\*.png']
+        restored_patterns = [os.path.join('normal_light_10', '*.png'), os.path.join('normal_light_20', '*.png')]
+d       istorted_patterns = [os.path.join('low_light_10', '*.png'), os.path.join('low_light_20', '*.png')]
 
         self.filesnames = [path for folder in self.folder_names for path in self.get_file_paths(self.root_restored, folder, restored_patterns, numframes//2)]
         self.distortednames = [path for folder in self.folder_names for path in self.get_file_paths(self.root_distorted, folder, distorted_patterns,numframes//2)]
