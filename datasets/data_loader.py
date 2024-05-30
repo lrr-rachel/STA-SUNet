@@ -11,17 +11,22 @@ import numpy as np
 class BVILowLight:
     def __init__(self,config):
         self.config = config
-    def load_lowlight(self):
+    def load_lowlight(self, topatch=True):
         print("=> load LLdataset using dataset '{}'".format(self.config.dataset.type))
         train_dataset = LowLightDataset(self.config.dataset.train_file, train=True,
                                         root_distorted=self.config.dataset.root_distorted,
                                         root_restored=self.config.dataset.root_restored, network=self.config.model.network, numframes=self.config.dataset.num_frames,
                                         transform=transforms.Compose([RandomCrop(output_size=self.config.dataset.image_size, topleft=self.config.dataset.aug_topleft),RandomFlip(),ToTensor(network=self.config.model.network)]))
-        val_dataset = LowLightDataset(self.config.dataset.val_file, train=False,
-                                        root_distorted=self.config.dataset.root_distorted,
-                                        root_restored=self.config.dataset.root_restored, network=self.config.model.network, numframes=self.config.dataset.num_frames,
-                                        transform=transforms.Compose([RandomCrop(output_size=self.config.dataset.image_size, topleft=self.config.dataset.aug_topleft),RandomFlip(),ToTensor(network=self.config.model.network)])
-                                        )
+        if topatch == True:
+            val_dataset = LowLightDataset(self.config.dataset.val_file, train=False,
+                                            root_distorted=self.config.dataset.root_distorted,
+                                            root_restored=self.config.dataset.root_restored, network=self.config.model.network, numframes=self.config.dataset.num_frames,
+                                            transform=transforms.Compose([RandomCrop(output_size=self.config.dataset.image_size, topleft=self.config.dataset.aug_topleft),ToTensor(network=self.config.model.network)]))
+        else: # test
+            val_dataset = LowLightDataset(self.config.dataset.val_file, train=False,
+                                            root_distorted=self.config.dataset.root_distorted,
+                                            root_restored=self.config.dataset.root_restored, network=self.config.model.network, numframes=self.config.dataset.num_frames,
+                                            transform=False)
 
         train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=self.config.training.batch_size,
                                                    shuffle=True, num_workers=self.config.dataset.num_workers,
@@ -111,7 +116,15 @@ class LowLightDataset(Dataset):
         groundtruth = cv2.imread(gt_path, cv2.IMREAD_COLOR)
         groundtruth = groundtruth.astype('float32')
         groundtruth = groundtruth/255.
+        
+        light = os.path.split(input_root)[-1]
+        scene = os.path.split(os.path.split(input_root)[0])[-1]
+        img_id = light+'-'+scene+'-'+input_filename[:-4]
+
         sample = {'image': image, 'groundtruth': groundtruth}
         if self.transform:
             sample = self.transform(sample)
+            
+        sample['img_id'] = img_id
+
         return sample

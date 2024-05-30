@@ -9,8 +9,12 @@
 ## STA-SUNet Architecture  
 <img src = "stasunet.png">
 
-## TODO
 ## Train
 ```
 python train.py
+```
+
+## Test
+```
+python test.py
 ```
