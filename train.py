@@ -22,19 +22,18 @@ parser.add_argument('--unetdepth', type=int, default=5, metavar='N',  help='PCDU
 parser.add_argument('--NoNorm', action='store_false', help='no normalisation layer')
 args = parser.parse_args()
 
-def dict2namespace(config):
-    namespace = argparse.Namespace()
-    for key, value in config.items():
-        if isinstance(value, dict):
-            new_value = dict2namespace(value)
+def convert_dict_to_namespace(d):
+    ns = argparse.Namespace()
+    for k, v in d.items():
+        if isinstance(v, dict):
+            setattr(ns, k, convert_dict_to_namespace(v))
         else:
-            new_value = value
-        setattr(namespace, key, new_value)
-    return namespace
+            setattr(ns, k, v)
+    return ns
 
-with open(args.config, "r") as f:
-    config = yaml.safe_load(f)
-config = dict2namespace(config)
+with open(args.config, "r") as file:
+    config_dict = yaml.safe_load(file)
+config = convert_dict_to_namespace(config_dict)
 
 
 if torch.cuda.is_available():
@@ -119,7 +118,8 @@ def train():
                         output = outputs.clone()
                         output = output.squeeze(0)
                         output = output.detach().cpu().numpy()
-                        output = output.transpose((1, 2, 0))
+                        output = output.transpose((1, 2, 0)) 
+                        output = np.clip(output, -1, 1)
                         output = (output*0.5 + 0.5)*255
                         cv2.imwrite(os.path.join(resultDirOut, 'training'+ str(epoch) + '_'+str(i)+ '.png'), output.astype(np.uint8))
 
@@ -133,8 +133,6 @@ def train():
             epoch_loss = running_loss / len(train_data)
             if phase == 'train':
                 train_loss.append(epoch_loss)
-            else:
-                val_loss.append(epoch_loss)
                 
             print('[Epoch] ' + str(epoch),':' + '[Loss] ' + str(epoch_loss))
 

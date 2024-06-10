@@ -30,19 +30,18 @@ if not os.path.exists(resultDirOutImg):
     os.mkdir(resultDirOutImg)
 output_file = 'TestResults_' + args.resultDir + '.txt'
 
-def dict2namespace(config):
-    namespace = argparse.Namespace()
-    for key, value in config.items():
-        if isinstance(value, dict):
-            new_value = dict2namespace(value)
+def convert_dict_to_namespace(d):
+    ns = argparse.Namespace()
+    for k, v in d.items():
+        if isinstance(v, dict):
+            setattr(ns, k, convert_dict_to_namespace(v))
         else:
-            new_value = value
-        setattr(namespace, key, new_value)
-    return namespace
+            setattr(ns, k, v)
+    return ns
 
-with open(args.config, "r") as f:
-    config = yaml.safe_load(f)
-config = dict2namespace(config)
+with open(args.config, "r") as file:
+    config_dict = yaml.safe_load(file)
+config = convert_dict_to_namespace(config_dict)
 
 if config.model.network=='STASUNet':
     model = STASUNet(num_in_ch=config.model.num_in_ch,num_out_ch=config.model.num_out_ch,num_feat=config.model.num_feat,num_frame=config.dataset.num_frames,deformable_groups=config.model.deformable_groups,num_extract_block=config.model.num_extract_block,
@@ -102,7 +101,6 @@ for sample in val_data:
     himg = img.shape[0]
     wimg = img.shape[1]
 
-    # weightMap = np.zeros((himg,wimg,3),np.float32) + 0.00001
     weightMap = np.zeros((himg,wimg,3),np.float32)
     probMap = np.zeros((himg,wimg,3),np.float32)
 
@@ -149,16 +147,16 @@ for sample in val_data:
     pred = probMap
     gt = sample['groundtruth'].squeeze(0)
     gt = gt.cpu().numpy()
-    gt = gt.astype('float32')
+    gt = (gt*255).astype('float32')
 
     psnrvalue = peak_signal_noise_ratio (gt, pred, data_range=255)
     ssimvalue = structural_similarity(gt, pred, channel_axis=2, data_range=255, multichannel=True)
-    pred_tensor = torch.tensor(pred.transpose((2, 0, 1)), dtype=torch.float32)
-    gt_tensor = torch.tensor(pred.transpose((2, 0, 1)), dtype=torch.float32)
+    pred_tensor = torch.tensor((pred/255.).transpose((2, 0, 1)), dtype=torch.float32)
+    gt_tensor = torch.tensor((gt/255.).transpose((2, 0, 1)), dtype=torch.float32)
     lpipsvalue = lpips_model(pred_tensor, gt_tensor).item()
-    # print('PSNR:', np.mean(psnrvalue))
-    # print('SSIM:', np.mean(ssimvalue))
-    # print('LPIPS:', np.mean(ssimvalue))
+    print('PSNR:', psnrvalue)
+    print('SSIM:', ssimvalue)
+    print('LPIPS:', lpipsvalue)
 
     list_psnr.append(psnrvalue)
     list_ssim.append(ssimvalue)
