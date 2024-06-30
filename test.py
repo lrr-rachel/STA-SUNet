@@ -14,7 +14,7 @@ import lpips
 from scipy.stats import norm
 
 parser = argparse.ArgumentParser(description='Test code')
-parser.add_argument("--config", default='STASUNet.yml', type=str, help="training config file")
+parser.add_argument("--config", default='config/STASUNet.yml', type=str, help="training config file")
 parser.add_argument('--resultDir', type=str, default='STASUNet', help='save output location')
 parser.add_argument('--savemodelname', type=str, default='model')
 parser.add_argument('--retrain', action='store_true')

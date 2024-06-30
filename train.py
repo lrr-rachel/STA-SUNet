@@ -13,13 +13,10 @@ import yaml
 from tqdm import tqdm
 
 parser = argparse.ArgumentParser(description='Main code')
-parser.add_argument("--config", default='STASUNet.yml', type=str, help="training config file")
+parser.add_argument("--config", default='config/STASUNet.yml', type=str, help="training config file")
 parser.add_argument('--resultDir', type=str, default='STASUNet', help='save output location')
 parser.add_argument('--savemodelname', type=str, default='model')
 parser.add_argument('--retrain', action='store_true')
-
-parser.add_argument('--unetdepth', type=int, default=5, metavar='N',  help='PCDUNet depth')
-parser.add_argument('--NoNorm', action='store_false', help='no normalisation layer')
 args = parser.parse_args()
 
 def convert_dict_to_namespace(d):
@@ -95,7 +92,7 @@ def train():
     train_loss = []
     val_loss = []
     for epoch in range(num_epochs+1):
-        for phase in ['train']:#, 'val']:
+        for phase in ['train', 'val']:
             if phase == 'train':
                 model.train()  # Set model to training mode
                 data = train_data
@@ -104,9 +101,10 @@ def train():
                 data = val_data
             running_loss = 0.0
 
-            for i, sample in enumerate(tqdm(data, desc='Epoch ' + str(epoch))):
-                # print(sample['image'].shape)
-                # print(sample['groundtruth'].shape)
+            # Initialize tqdm 
+            progress_bar = tqdm(data, desc=f'Epoch {epoch}', leave=False)
+            for i, sample in enumerate(progress_bar):
+
                 inputs = sample['image'].to(device)
                 labels = sample['groundtruth'].to(device)
                 # zero the parameter gradients
@@ -127,14 +125,14 @@ def train():
                     if phase == 'train':
                         loss.backward()
                         optimizer.step()
+                    progress_bar.set_description(f'Epoch {epoch} | Loss: {loss.item():.4f}')
                 # statistics
                 running_loss += loss.item() * inputs.size(0)
 
             epoch_loss = running_loss / len(train_data)
             if phase == 'train':
                 train_loss.append(epoch_loss)
-                
-            print('[Epoch] ' + str(epoch),':' + '[Loss] ' + str(epoch_loss))
+
 
             torch.save(model.state_dict(), os.path.join(resultDirModel, args.savemodelname + '_ep'+str(epoch)+'.pth.tar'))
             np.save(os.path.join(resultDirModel,'loss_array.npy'), np.array(train_loss))

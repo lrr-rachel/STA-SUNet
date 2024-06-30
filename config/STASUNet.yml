@@ -27,7 +27,7 @@ model:
 
 training:
   batch_size: 1
-  maxepoch: 20
+  maxepoch: 25
   lr: 0.0001
   
 
