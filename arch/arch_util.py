@@ -11,7 +11,15 @@ from torch.nn import init as init
 from torch.nn.modules.batchnorm import _BatchNorm
 from dcn import ModulatedDeformConvPack, modulated_deform_conv
 
-''' following functions are adpated from https://github.com/xinntao/EDVR'''
+# The code is originally sourced from and adapted from:
+# @misc{wang2020basicsr,
+#  author =       {Xintao Wang and Ke Yu and Kelvin C.K. Chan and
+#                  Chao Dong and Chen Change Loy},
+#  title =        {BasicSR},
+#  howpublished = {\url{https://github.com/xinntao/BasicSR}},
+#  year =         {2020}
+# }
+# https://github.com/xinntao/EDVR
 
 @torch.no_grad()
 def default_init_weights(module_list, scale=1, bias_fill=0, **kwargs):

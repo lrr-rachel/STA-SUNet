@@ -3,6 +3,17 @@ import torch.nn as nn
 import torch.utils.checkpoint as checkpoint
 from timm.models.layers import DropPath, to_2tuple, trunc_normal_
 
+# The code is originally sourced from and adapted from:
+# @inproceedings{fan2022sunet,
+#  title={SUNet: swin transformer UNet for image denoising},
+#  author={Fan, Chi-Mao and Liu, Tsung-Jung and Liu, Kuan-Hsien},
+#  booktitle={2022 IEEE International Symposium on Circuits and Systems (ISCAS)},
+#  pages={2333--2337},
+#  year={2022},
+#  organization={IEEE}
+# }
+# https://github.com/FanChiMao/SUNet
+
 
 class SwinTransformerBlock(nn.Module):
     """ Swin Transformer Block.

@@ -3,6 +3,16 @@ from torch import nn as nn
 from torch.nn import functional as F
 from arch.arch_util import DCNv2Pack
 
+# The code is originally sourced from and adapted from:
+# @misc{wang2020basicsr,
+#  author =       {Xintao Wang and Ke Yu and Kelvin C.K. Chan and
+#                  Chao Dong and Chen Change Loy},
+#  title =        {BasicSR},
+#  howpublished = {\url{https://github.com/xinntao/BasicSR}},
+#  year =         {2020}
+# }
+# https://github.com/xinntao/EDVR
+
 class PCDAlignment(nn.Module):
     """Alignment module using Pyramid, Cascading and Deformable convolution (PCD). 
 

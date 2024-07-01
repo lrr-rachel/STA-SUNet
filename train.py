@@ -63,7 +63,7 @@ def train():
                         num_reconstruct_block=config.model.num_reconstruct_block,center_frame_idx=None,hr_in=config.model.hr_in,img_size=config.dataset.image_size,patch_size=config.model.patch_size,embed_dim=config.model.embed_dim, depths=config.model.depths,num_heads=config.model.num_heads,
                         window_size = config.model.window_size,patch_norm=config.model.patch_norm,final_upsample="Dual up-sample")
     else:
-        print("please specify model name!")
+        print("Please specify a valid model name!")
 
     if args.retrain:
         models = glob.glob(os.path.join(args.resultDirModel, args.savemodelname + '_ep*.pth.tar'))
@@ -97,6 +97,8 @@ def train():
                 model.train()  # Set model to training mode
                 data = train_data
             else:
+                if epoch % config.training.eval_frequency != 0:
+                    continue
                 model.eval()   # Set model to evaluate mode
                 data = val_data
             running_loss = 0.0
@@ -112,7 +114,7 @@ def train():
                 # forward
                 with torch.set_grad_enabled(phase == 'train'): # track history if only in train
                     outputs = model(inputs)
-                    if (i < 10): # load training samples
+                    if phase == 'train' and i < 10: # load training samples
                         output = outputs.clone()
                         output = output.squeeze(0)
                         output = output.detach().cpu().numpy()
@@ -129,7 +131,7 @@ def train():
                 # statistics
                 running_loss += loss.item() * inputs.size(0)
 
-            epoch_loss = running_loss / len(train_data)
+            epoch_loss = running_loss / len(data)
             if phase == 'train':
                 train_loss.append(epoch_loss)
 

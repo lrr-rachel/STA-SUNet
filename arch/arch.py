@@ -22,7 +22,10 @@ class STASUNet(nn.Module):
         center_frame_idx (int): The index of center frame. Frame counting from
             0. Default: Middle of input frames.
         hr_in (bool): Whether the input has high resolution. Default: True.
-        
+        embed_dim (int): Patch embedding feature dimension. Default: 64
+        depths (tuple(int)): Depth of each Swin Transformer layer.
+        num_heads (tuple(int)): Number of attention heads in different layers.
+        window_size (int): Window size. Default: 7
     """
 
     def __init__(self,
