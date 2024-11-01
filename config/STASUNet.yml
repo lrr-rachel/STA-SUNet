@@ -1,9 +1,9 @@
 dataset:
   type: "BVILowLight"
-  train_file: "E:\\dataset\\low_light_data_capture\\train_list.txt"
-  val_file: "E:\\dataset\\low_light_data_capture\\test_list.txt"
-  root_distorted: "E:\\dataset\\low_light_data_capture\\input"
-  root_restored: "E:\\dataset\\low_light_data_capture\\gt"
+  train_file: "/home/gf19473/datasets/lowlight_dataset/train_list.txt"
+  val_file: "/home/gf19473/datasets/lowlight_dataset/test_list.txt"
+  root_distorted: "/home/gf19473/datasets/lowlight_dataset/input"
+  root_restored: "/home/gf19473/datasets/lowlight_dataset/gt"
   image_size: 512
   num_frames: 5
   num_workers: 0
